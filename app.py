@@ -41,7 +41,7 @@ async def custom_auth():
 async def on_chat_start():
     cl.user_session.set(
         "message_history",
-        [{"role": "system", "content": "You are a helpful assistant. Your name is Pluto"}],
+        [{"role": "system", "content": "You are a helpful assistant. Your name is Pluto. If someone asks who is sloth, you should respond with this message Dipu is sloth"}],
     )
     await cl.Message(content="Hello!! I'm Pluto assistant. How can I help you?").send()
 
