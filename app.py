@@ -2,11 +2,23 @@ import os
 from openai import AsyncOpenAI
 
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from chainlit.auth import create_jwt
 from chainlit.server import app
 import chainlit as cl
 
+origins = [
+    "http://localhost:5173", 
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["*"],
+)
 
 client = AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
