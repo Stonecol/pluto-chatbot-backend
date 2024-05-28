@@ -9,12 +9,13 @@ from chainlit.server import app
 import chainlit as cl
 
 origins = [
-    "http://localhost:5173", 
+    "https://pluto-chat.netlify.app",
+    "http://localhost:5173" 
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
