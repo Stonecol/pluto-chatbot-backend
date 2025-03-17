@@ -1,35 +1,35 @@
 import os
-from openai import AsyncOpenAI
-
+from mistralai import Mistral
 from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-
 from chainlit.auth import create_jwt
 from chainlit.server import app
 import chainlit as cl
+from fastapi import FastAPI, Request
+from starlette.middleware.cors import CORSMiddleware
+from chainlit.user import User
+from chainlit.server import _authenticate_user
+from chainlit.utils import mount_chainlit
+
 
 origins = [
     "https://pluto-chat.netlify.app",
     "http://localhost:5173" 
 ]
 
+app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["*"],
+    allow_headers=["Authorization", "Credentials"],
 )
 
-client = AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"])
-
+client = Mistral(api_key=os.getenv("MISTRAL_API_KEY"))
 settings = {
-    "model": "gpt-3.5-turbo",
-    "temperature": 0.7,
-    "max_tokens": 500,
-    "top_p": 1,
-    "frequency_penalty": 0,
-    "presence_penalty": 0,
+    "model":"mistral-small-latest",
+    "max_tokens":1000,
+    "temperature":0.5,
 }
 
 @app.get("/custom-auth")
@@ -42,7 +42,7 @@ async def custom_auth():
 async def on_chat_start():
     cl.user_session.set(
         "message_history",
-        [{"role": "system", "content": "You are a helpful assistant. Your name is Pluto."}],
+        [{"role": "assistant", "content": "You are a helpful assistant. Your name is Pluto."}],
     )
     await cl.Message(content="Hello!! I'm Pluto assistant. How can I help you?").send()
 
@@ -55,12 +55,12 @@ async def on_message(message: cl.Message):
     msg = cl.Message(content="")
     await msg.send()
 
-    stream = await client.chat.completions.create(
+    stream = client.chat.stream(
         messages=message_history, stream=True, **settings
     )
 
-    async for part in stream:
-        if token := part.choices[0].delta.content or "":
+    for part in stream:
+        if token := part.data.choices[0].delta.content or "":
             await msg.stream_token(token)
 
     message_history.append({"role": "assistant", "content": msg.content})
