@@ -1,4 +1,5 @@
-openai
 fastapi
 chainlit
 uvicorn[standard]
+mistralai
+pydantic==2.10.1
