@@ -15,7 +15,7 @@ origins = [
     "https://pluto-chat.netlify.app",
     "http://localhost:5173" 
 ]
-
+PORT = os.environ.get('PORT') or 8000
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
